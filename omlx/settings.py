@@ -431,15 +431,16 @@ class HuggingFaceSettings:
     """HuggingFace Hub configuration settings."""
 
     endpoint: str = ""  # Empty string = use HF default (https://huggingface.co)
+    token: str = ""  # Stored token for downloads (persisted but never exposed via API)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
-        return {"endpoint": self.endpoint}
+        return {"endpoint": self.endpoint, "token": self.token}
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "HuggingFaceSettings":
         """Create from dictionary."""
-        return cls(endpoint=data.get("endpoint", ""))
+        return cls(endpoint=data.get("endpoint", ""), token=data.get("token", ""))
 
 
 @dataclass

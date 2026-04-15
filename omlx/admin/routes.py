@@ -3162,10 +3162,15 @@ async def start_hf_download(
     if _hf_downloader is None:
         raise HTTPException(status_code=503, detail="Downloader not initialized")
 
+    # Use stored token as fallback when request token is empty
+    hf_token = request.hf_token
+    if not hf_token:
+        settings = _get_global_settings()
+        if settings:
+            hf_token = settings.huggingface.token
+
     try:
-        task = await _hf_downloader.start_download(
-            request.repo_id, request.hf_token
-        )
+        task = await _hf_downloader.start_download(request.repo_id, hf_token or "")
         return {"success": True, "task": task.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -3207,8 +3212,15 @@ async def retry_hf_download(
     if _hf_downloader is None:
         raise HTTPException(status_code=503, detail="Downloader not initialized")
 
+    # Use stored token as fallback when request token is empty
+    hf_token = request.hf_token
+    if not hf_token:
+        settings = _get_global_settings()
+        if settings:
+            hf_token = settings.huggingface.token
+
     try:
-        task = await _hf_downloader.retry_download(task_id, request.hf_token)
+        task = await _hf_downloader.retry_download(task_id, hf_token or "")
         return {"success": True, "task": task.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
